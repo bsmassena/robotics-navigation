@@ -1,7 +1,7 @@
 FROM ubuntu:18.04
 
 RUN apt-get -y update
-RUN apt-get install -y apt-utils make g++ unzip
+RUN apt-get install -y apt-utils make g++ unzip freeglut3-dev libfreeimage-dev 
 
 COPY dependencies /dependencies
 WORKDIR /dependencies
@@ -18,4 +18,4 @@ RUN ldconfig
 
 RUN apt-get install -y ./mobilesim_0.7.3+ubuntu12+gcc4.6_amd64.deb
 
-WORKDIR /
+WORKDIR /phir2framework
