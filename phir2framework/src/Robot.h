@@ -20,19 +20,17 @@ public:
     void draw(float xRobot, float yRobot, float angRobot);
     void drawPath();
 
-    const Pose& getCurrentPose();
+    const Pose &getCurrentPose();
 
     bool isReady();
     bool isRunning();
 
-    Grid* grid;
+    Grid *grid;
     MotionMode motionMode_;
     int viewMode;
     int numViewModes;
 
-
 protected:
-
     Pose currentPose_;
     std::vector<Pose> path_;
 
@@ -43,7 +41,7 @@ protected:
     PioneerBase base;
 
     // Log stuff
-    LogFile* logFile_;
+    LogFile *logFile_;
     LogMode logMode_;
     void writeOnLog();
     bool readFromLog();
@@ -52,6 +50,8 @@ protected:
     void wanderAvoidingCollisions();
     void wallFollow();
     bool isFollowingLeftWall_;
+    float lastLeftCTE;
+    float lastRightCTE;
 
     Timer controlTimer;
 };
