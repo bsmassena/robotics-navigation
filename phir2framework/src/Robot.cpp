@@ -140,10 +140,6 @@ void Robot::move(MovingDirection dir)
 
 void Robot::wanderAvoidingCollisions()
 {
-    float minLeftSonar  = base.getMinSonarValueInRange(0,2);
-    float minFrontSonar = base.getMinSonarValueInRange(3,4);
-    float minRightSonar = base.getMinSonarValueInRange(5,7);
-
     float minLeftLaser  = base.getMinLaserValueInRange(0,74);
     float minFrontLaser = base.getMinLaserValueInRange(75,105);
     float minRightLaser = base.getMinLaserValueInRange(106,180);
@@ -151,10 +147,14 @@ void Robot::wanderAvoidingCollisions()
     float linVel=0;
     float angVel=0;
 
-    //TODO - implementar desvio de obstaculos
-
-
-
+    if (minFrontLaser < 1.0) {
+        if (minLeftLaser > minRightLaser)
+            angVel = 1;
+        else
+            angVel = -1;
+    } else {
+        linVel = 500;
+    }
 
     base.setWheelsVelocity_fromLinAngVelocity(linVel, angVel);
 }
