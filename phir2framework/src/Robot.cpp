@@ -153,7 +153,7 @@ void Robot::wanderAvoidingCollisions()
         else
             angVel = -1;
     } else {
-        linVel = 500;
+        linVel = 0.5;
     }
 
     base.setWheelsVelocity_fromLinAngVelocity(linVel, angVel);
@@ -161,62 +161,35 @@ void Robot::wanderAvoidingCollisions()
 
 void Robot::wallFollow()
 {
-    float minLeftSonar  = base.getMinSonarValueInRange(0,2);
-    float minFrontSonar = base.getMinSonarValueInRange(3,4);
-    float minRightSonar = base.getMinSonarValueInRange(5,7);
-
     float minLeftLaser  = base.getMinLaserValueInRange(0,74);
     float minFrontLaser = base.getMinLaserValueInRange(75,105);
     float minRightLaser = base.getMinLaserValueInRange(106,180);
 
-    float linVel=0;
-    float angVel=0;
+    float linVel=0.2;
 
     float crossTrackError;
-    float p = 35.0;
-    float d = 150.0;
-//    float d = 0;
+    float p = 0.5;
+    float d = 1.5;
     float distanceToWall = 1.5;
+    float crossTrackErrorLimit = 1.0;
 
     float lastCrossTrackError;
 
     if(isFollowingLeftWall_) {
-        std::cout << "Following LEFT wall" << std::endl;
-//        crossTrackError = minLeftLaser - distanceToWall;
         crossTrackError = distanceToWall - minLeftLaser;
+        crossTrackError = std::max(crossTrackError, -crossTrackErrorLimit);
         lastCrossTrackError = lastLeftCTE;
         lastLeftCTE = crossTrackError;
-        std::cout << "min: ";
-        std::cout << minLeftLaser << std::endl;
     } else {
-        std::cout << "Following RIGHT wall" << std::endl;
         crossTrackError = minRightLaser - distanceToWall;
+        crossTrackError = std::min(crossTrackError, crossTrackErrorLimit);
         lastCrossTrackError = lastRightCTE;
         lastRightCTE = crossTrackError;
-        std::cout << "min: ";
-        std::cout << minRightLaser << std::endl;
-//        std::cout << "last right: ";
-//        std::cout << lastRightCTE << std::endl;
-//        std::cout << "cte: ";
-//        std::cout << crossTrackError << std::endl;
     }
 
-    float w = -(p * crossTrackError) - (d * (crossTrackError - lastCrossTrackError));
+    float angVel = -(p * crossTrackError) - (d * (crossTrackError - lastCrossTrackError));
 
-    std::cout << " FUNCIONA" << std::endl;
-    std::cout << "CTE: ";
-    std::cout << crossTrackError << std::endl;
-    std::cout << "Last CTE: ";
-    std::cout << lastCrossTrackError << std::endl;
-    std::cout << "P: ";
-    std::cout << -(p * crossTrackError);
-    std::cout << "Diff: ";
-    float diff = d * (crossTrackError - lastCrossTrackError);
-    std::cout << diff << std::endl;
-    std::cout << "W: ";
-    std::cout << w << std::endl;
-
-    base.setWheelsVelocity_fromLinAngVelocity(5, w);
+    base.setWheelsVelocity_fromLinAngVelocity(linVel, angVel);
 }
 
 /////////////////////////////////////////////////////
