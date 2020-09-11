@@ -18,6 +18,8 @@ Robot::Robot()
     // variables used for navigation
     isFollowingLeftWall_=false;
     motionMode_ = MANUAL_SIMPLE;
+    lastLeftCTE = 0;
+    lastRightCTE = 0;
 
     // variables used for visualization
     viewMode=1;
@@ -138,31 +140,54 @@ void Robot::move(MovingDirection dir)
 
 void Robot::wanderAvoidingCollisions()
 {
+    float minLeftLaser  = base.getMinLaserValueInRange(0,74);
+    float minFrontLaser = base.getMinLaserValueInRange(75,105);
+    float minRightLaser = base.getMinLaserValueInRange(106,180);
+
     float linVel=0;
     float angVel=0;
 
-    //TODO - implementar desvio de obstaculos
-
-
-
+    if (minFrontLaser < 1.0) {
+        if (minLeftLaser > minRightLaser)
+            angVel = 1;
+        else
+            angVel = -1;
+    } else {
+        linVel = 0.5;
+    }
 
     base.setWheelsVelocity_fromLinAngVelocity(linVel, angVel);
 }
 
 void Robot::wallFollow()
 {
-    float linVel=0;
-    float angVel=0;
+    float minLeftLaser  = base.getMinLaserValueInRange(0,74);
+    float minFrontLaser = base.getMinLaserValueInRange(75,105);
+    float minRightLaser = base.getMinLaserValueInRange(106,180);
 
-    if(isFollowingLeftWall_)
-        std::cout << "Following LEFT wall" << std::endl;
-    else
-        std::cout << "Following RIGHT wall" << std::endl;
+    float linVel=0.2;
 
-    //TODO - implementar wall following usando PID
+    float crossTrackError;
+    float p = 0.5;
+    float d = 1.5;
+    float distanceToWall = 1.5;
+    float crossTrackErrorLimit = 1.0;
 
+    float lastCrossTrackError;
 
+    if(isFollowingLeftWall_) {
+        crossTrackError = distanceToWall - minLeftLaser;
+        crossTrackError = std::max(crossTrackError, -crossTrackErrorLimit);
+        lastCrossTrackError = lastLeftCTE;
+        lastLeftCTE = crossTrackError;
+    } else {
+        crossTrackError = minRightLaser - distanceToWall;
+        crossTrackError = std::min(crossTrackError, crossTrackErrorLimit);
+        lastCrossTrackError = lastRightCTE;
+        lastRightCTE = crossTrackError;
+    }
 
+    float angVel = -(p * crossTrackError) - (d * (crossTrackError - lastCrossTrackError));
 
     base.setWheelsVelocity_fromLinAngVelocity(linVel, angVel);
 }
